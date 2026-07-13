@@ -10,7 +10,7 @@ description: 법인카드 정산 — EAC(직방 전자결재)에서 법인카드
 - **전표 생성까지만 자동. 최종 상신(결재요청)은 Tyler가 직접 한다.** `node submit.js approve`를 임의로 실행하지 말 것 (2026-07-10 Tyler 결정).
 - 분류불가 건은 임의 분류하지 말고 제외 후 보고.
 
-## 실행 (작업 폴더: `~/eac-card-agent`)
+## 실행 (작업 폴더: `~/.claude/skills/eac-card-agent`)
 
 ```
 node status.js           # 현재 상태 확인 (읽기 전용)
@@ -20,7 +20,7 @@ node submit.js create N  # 앞에서 N건만 전표생성
 ```
 
 - 세션 만료 시 `node login.js` (headed 브라우저, Google SSO, 영구 프로필 ./profile)
-- 상세 아키텍처·분류 규칙·이력: `~/eac-card-agent/PROGRESS.md` (런북 — 작업 전 반드시 읽을 것)
+- 상세 아키텍처·분류 규칙·이력: `~/.claude/skills/eac-card-agent/PROGRESS.md` (런북 — 작업 전 반드시 읽을 것)
 
 ## 핵심 지식 (요약)
 

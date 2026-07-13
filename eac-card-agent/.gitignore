@@ -1,0 +1,9 @@
+node_modules/
+profile/
+logs/
+inbox/
+out/
+explore-out/
+explore*.js
+trip-items.json
+*.log

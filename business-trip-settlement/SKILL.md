@@ -11,15 +11,15 @@ description: 출장비 정산 — 삼성카드 결제내역·매출전표·T월�
 - **중복 정산 방지**: 호텔·항공 등이 이미 법인카드/사전정산으로 상신됐는지 EA전표결재·완료함에서 먼저 확인. (선례: 6월 중국출장 호텔/항공/로밍보험 3건은 별도 상신돼 있어 제외했음)
 - 경비 1건 = 전표 1개, **증빙 첨부 필수** (items의 file 필드 없으면 ZUNIEFI_4006 거부)
 
-## 진행 순서 (상세 런북: `~/eac-card-agent/PROGRESS.md`의 "다음 출장 정산 런북" — 작업 전 반드시 읽을 것)
+## 진행 순서 (상세 런북: `~/.claude/skills/eac-card-agent/PROGRESS.md`의 "다음 출장 정산 런북" — 작업 전 반드시 읽을 것)
 
 1. **결제내역 수집**: `cd ~/flex-fitness-agent && node trip-collect.js --from 2026.MM.DD --to 2026.MM.DD`
    (headed, 삼성카드 로그인 필요 — 10분 세션이라 매번 로그인. flex 로그인도 이어서 하면 원품의 후보까지 수집)
-2. **증빙 캡처** (→ `~/eac-card-agent/inbox/`에 저장):
+2. **증빙 캡처** (→ `~/.claude/skills/eac-card-agent/inbox/`에 저장):
    - 카드 매출전표: `node trip-capture-slip.js --date 2026.MM.DD --amount N --name 이름`
    - 로밍요금: `node trip-roaming.js --from 2026.MM.DD --to 2026.MM.DD` — T월드 로밍청구내역서 PDF+PNG.
      ※ 로밍은 사용 **다음 달** 청구(최대 3개월 지연) — 귀국 다음 달에 실행
-3. **전표 생성** (작업 폴더 `~/eac-card-agent`):
+3. **전표 생성** (작업 폴더 `~/.claude/skills/eac-card-agent`):
    - `trip-items.json` 작성: `[{date:"YYYYMMDD", desc, account, amount, file}]`
    - 계정: 52040301 항공료 / 52040302 기타교통비 / 52040303 숙박비 / 52040304 식대 / 52040305 기타
    - `node trip.js plan`(검증·미리보기) → `node trip.js dry`(폼만) → `node trip.js run`(전표생성, 상신 안 함)
