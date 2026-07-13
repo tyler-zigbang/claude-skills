@@ -41,8 +41,9 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - [x] 작업 스케줄러 등록: "EAC Card Agent Monthly" — 매월 5일 09:00, run-monthly.ps1
       (놓친 실행은 PC 켜지면 실행, 로그: logs/monthly-*.log)
 - [x] 2026-07-13 실행: 15건 전표생성 완료 (3200010229~3200010243, 분류불가 0건, 미상신)
-- [x] 2026-07-13 이관: `~/eac-card-agent` → `~/.claude/skills/eac-card-agent` (claude-skills repo에 통합 백업).
-      작업 스케줄러·run-monthly.ps1·SKILL.md 2개·flex trip-capture-slip.js/trip-roaming.js 경로 갱신 완료
+- [x] 2026-07-13 이관: `~/eac-card-agent` → **`~/.claude/skills/corporate-card-settlement/agent`** (스킬에 통합, claude-skills repo 백업).
+      작업 스케줄러·run-monthly.ps1·SKILL.md 2개·flex trip-capture-slip.js/trip-roaming.js 경로 갱신 완료.
+      business-trip-settlement 스킬도 이 agent 폴더를 공용으로 사용 (trip.js)
 - [ ] Tyler가 EAC에서 상신 (결재요청 버튼만 누르면 됨)
 - [ ] Slack 알림 연동 (실행 결과 + 분류불가 건 통보)
 
@@ -67,12 +68,12 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 1. 삼성카드 결제 확인: `cd ~/flex-fitness-agent && node trip-collect.js --from 2026.MM.DD --to 2026.MM.DD`
    (headed, 삼성카드 로그인 필요 — 10분 세션이라 매번 로그인. flex 로그인도 이어서 하면 원품의 후보까지 수집)
 2. 증빙 캡처: 건별로 `node trip-capture-slip.js --date 2026.MM.DD --amount N --name 이름`
-   → ~/.claude/skills/eac-card-agent/inbox/에 저장됨
+   → ~/.claude/skills/corporate-card-settlement/agent/inbox/에 저장됨
    로밍요금: `node trip-roaming.js --from 2026.MM.DD --to 2026.MM.DD` — T월드 요금안내서 >
    로밍 이용요금 상세조회에서 출장기간 조회(달력 위젯 자동 조작) 후 **공식 로밍청구내역서를 PDF+PNG로 inbox에 저장**
    (금액도 로그로 출력). 세션 만료 시 자동 headed 전환(로그인 필요, 쿠키 out/tworld-cookies.json).
    ※ 로밍요금은 사용 다음 달 청구 (해외사업자 자료 지연 시 최대 3개월) — 귀국 다음 달에 실행
-3. ~/.claude/skills/eac-card-agent/trip-items.json 작성 (date/desc/account/amount/file) → `node trip.js plan` → `run`
+3. ~/.claude/skills/corporate-card-settlement/agent/trip-items.json 작성 (date/desc/account/amount/file) → `node trip.js plan` → `run`
 4. 상신(Tyler 수동): EA전표결재 → 행 선택 → 그룹번호생성 → 결재요청 → 팝업에서 제목 확인,
    **품의 첨부에 flex 출장품의서 URL 추가**(원품의) → 결재요청. 원품의 URL은 flex 내문서함에서 해당 출장품의서 열어 복사
    (또는 `node trip-flex-wonpum.js`로 "출장" 검색 자동 수집 — 내가 작성한 문서 필터)
