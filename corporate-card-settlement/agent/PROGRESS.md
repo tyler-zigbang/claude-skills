@@ -102,10 +102,13 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - 사용법: `node approve.js menus|scan|open <WF_KEY>|flex <URL>|approve <WF_KEY>`
 - flex 원품의 열람은 ~/flex-fitness-agent의 profile+쿠키 재사용 (만료 시 그쪽 login.js)
 - 스케줄: 작업 스케줄러 "EAC Approval AM/PM" (평일 11:00/18:00, run-claude.ps1 + ~/.claude/skills/eac-approval/prompt-scheduled.txt) — **현재 비활성**
-- [ ] **사내망에서 탐색 필요**: ①결재 대기함 메뉴명 확정(scan의 INBOX_LEAF_CANDIDATES) ②대기함 그리드 필드 파악
-      ③문서 팝업에서 승인 버튼/확인 팝업 흐름 확정(cmdApprove의 후보 셀렉터 검증) ④원품의 flex URL 추출 위치 확인
-- [ ] 검증 완료 후: approve-ready.flag 생성(이거 없으면 approve 거부됨) + 스케줄러 활성화(Enable-ScheduledTask "EAC Approval AM","EAC Approval PM")
-- 안전장치: approve-ready.flag 없으면 승인 거부 / 스킬·프롬프트에 "확신 없으면 보류" 원칙 명시
+- [x] 사내망 탐색 완료(2026-07-14): 대기함 = 전자결재>대기함, 그리드 필드 WF_KEY/WF_TITLE/WF_AMOUNT(원화)/WF_ID_TXT/EVIKB_TXT 등.
+      문서는 view.do URL로 직접 열림(팝업창 아님, 같은 페이지). 원품의 = 문서 내 'unidocu-grid'(ITKD_TXT+URL) → flex URL.
+      flex 열람 headless 검증 완료(RTC 원품의로 테스트). 승인/반려 버튼은 결재 차례일 때만 visible (완료 문서에선 숨김).
+- [x] approve-ready.flag 생성 + 스케줄러 활성화 (2026-07-14)
+- [ ] **첫 실제 승인 관찰**: 승인 클릭→모달 처리 루프는 대기 문서가 없어 실클릭 미검증. 실패해도 문서는 대기함에 남고(=보류 DM)
+      logs/approve-*-before/after.png + approve-*.log로 사후 확인 가능. 첫 승인 성공 확인되면 이 항목 지울 것.
+- 안전장치: approve는 ①대기함 재확인(NOT_IN_INBOX) ②승인 후 대기함 소멸 검증(STILL_IN_INBOX) ③오류 모달 시 중단+스크린샷
 
 ## 주의
 - explore*.js는 개발 중 탐색 스크립트 (지워도 됨). 산출물은 lib/, submit.js, status.js, trip.js, selfcare.js, approve.js

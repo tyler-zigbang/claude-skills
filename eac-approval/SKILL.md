@@ -19,11 +19,15 @@ description: EAC(이어카운팅) 결재 승인 자동화 — Gmail의 (결재�
 (Playwright + Chrome 영구 프로필 ./profile, EAC Google SSO 세션 재사용. 세션 만료 시 `node login.js`)
 
 ```
-node approve.js scan             # 결재 대기 문서 목록 + 상세(금액·첨부·원품의 URL) JSON 출력 (읽기 전용)
-node approve.js open <WF_KEY>    # 문서 1건 팝업 열어 상세 덤프 (읽기 전용, 디버그용)
-node approve.js flex <URL>       # flex 원품의 문서 열어 내용(제목·금액·본문) 덤프 (읽기 전용)
-node approve.js approve <WF_KEY> # 문서 1건 승인 (신중히!)
+node approve.js scan             # 대기함 문서 목록 JSON: {pending, docs:[{WF_KEY,WF_KEY_TEXT,WF_TITLE,WF_AMOUNT,WF_ID_TXT,WF_DATE,EVIKB_TXT,...}]}
+node approve.js open <WF_KEY>    # 문서 상세: bodyText(결재선·품의내용·전표라인) + attachments(ITKD_TXT=원품의/날인품의 + flex URL)
+node approve.js flex <URL>       # flex 원품의 내용 덤프 (bodyText 뒷부분 12000자, flex 세션 재사용)
+node approve.js approve <WF_KEY> # 문서 1건 승인 — 대기함 재확인 후 클릭, 승인 후 대기함에서 사라졌는지 검증까지 자동
 ```
+
+- 금액 단위 주의: WF_AMOUNT는 원화 숫자(예: "181111342"). 전표가 외화(USD 등)면 bodyText의 전표 라인에서 통화·환율을 함께 본다.
+- flex 품의는 외화(RMB 등)로 적혀 있을 수 있다 — 환율 감안해 대조하고, 분할지급(선금 40% 등)이면 이번 전표 금액이 품의의 해당 회차 금액과 맞는지 본다.
+- approve 실패 exit code: 6=대기함에 없음, 7=예상 밖 모달(스크린샷 logs/), 8=승인 후에도 대기함에 남음. 실패 = 보류로 처리.
 
 ⚠️ EAC(eac.zigbang.in)는 사내망 전용 — DNS가 안 풀리면 회사 네트워크/VPN이 아닌 것. 그 경우 작업을 중단하고 그 사실만 보고한다.
 
@@ -37,15 +41,15 @@ node approve.js approve <WF_KEY> # 문서 1건 승인 (신중히!)
 
 ### 2단계 — EAC 대기함 스캔
 
-`node approve.js scan` 실행 → 대기 문서 목록 JSON.
-- 문서별로: WF_KEY, 문서번호, 제목, 상신자, 금액, 계정, 적요, 첨부 목록(원품의 flex URL 포함).
+`node approve.js scan` 실행 → 대기 문서 목록. 0건이면 4단계 건너뛰고 5단계에서 "대기 없음" 보고.
 
 ### 3단계 — 문서별 심사
 
 각 문서에 대해:
-1. 원품의 flex URL이 없으면 → **보류** (사유: "원품의 첨부 없음").
-2. `node approve.js flex <URL>`로 flex 품의 내용을 읽는다. 실패하면 → **보류** (사유: "flex 품의 열람 실패").
-3. 전표 금액 ≤ 품의 금액이고 품목·거래처가 부합하면 → **승인 대상**. 아니면 → **보류** (사유 명시: 금액 초과, 내용 불일치 등).
+1. `node approve.js open <WF_KEY>`로 상세를 읽는다 — bodyText(품의 내용·전표 라인·결재선)와 attachments.
+2. attachments에 ITKD_TXT="원품의"인 flex URL이 없으면 → **보류** (사유: "원품의 첨부 없음").
+3. `node approve.js flex <원품의URL>`로 flex 품의 내용을 읽는다. 실패하면 → **보류** (사유: "flex 품의 열람 실패").
+4. 대조: ①전표 금액이 품의 금액(해당 지급 회차) 이내인가 ②거래처·품목이 품의와 부합하는가 ③통화·환율이 설명과 맞는가. 모두 충족 → **승인 대상**. 하나라도 아니거나 판단이 애매하면 → **보류** (사유 명시).
 
 ### 4단계 — 승인 실행
 
