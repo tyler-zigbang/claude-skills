@@ -79,6 +79,18 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
    (또는 `node trip-flex-wonpum.js`로 "출장" 검색 자동 수집 — 내가 작성한 문서 필터)
 - 주의: 호텔·항공을 법인카드/사전정산으로 이미 냈는지 EA전표결재·완료함에서 먼저 확인 (중복 정산 방지)
 
+## 자기관리비(장려지원금) 봇 — selfcare.js (2026-07-14 추가, 스킬: self-care-allowance)
+- 자기관리비/가족식사비 = 비용정산 > **장려지원금** (FI_21). 화면 구조는 일반경비(FI_22)와 동일 → trip.js 복제·수정
+- 과거 패턴(Zigbang-회계전표-2026-0000022872 "자기관리비(미용)" 49,000원, 0000022962 "2사분기 가족식사비" 202,000원):
+  전표유형 KE, 사업영역 K200, 조정계정 21020103(ZB00896 정진우), 세금 T0, 지급방법 R,
+  지급조건 V123(익월 23일), CC 226020, 증빙일=지출일, **첨부 0건으로도 결재 통과** (그래도 첨부 권장)
+- 계정: 52010108 판)복리후생비-자기관리비 | 52010109 판)복리후생비-가족식사비
+- 폼 기본값(BLART/GSBER/ZLSCH/MWSKZ/LIFNR/ZTERM/KOSTL)이 이미 과거 패턴과 일치 — BLDAT·SGTXT·HKONT·WRBTR만 입력
+- 입력: `selfcare-items.json` (예시: selfcare-items.example.json), 사용법: `node selfcare.js plan → dry → run`
+- 증빙: 삼성카드 매출전표 캡처는 ~/flex-fitness-agent/trip-capture-slip.js 재활용 (inbox/에 저장)
+- 결재선(과거): 경비검토(성민지) → Leah Song(송현아)
+- 2026-07-14 dry 검증 완료 (폼 입력·계정명 조회·지급예정일 자동계산 확인, 전표생성은 안 누름)
+
 ## 주의
-- explore*.js는 개발 중 탐색 스크립트 (지워도 됨). 산출물은 lib/, submit.js, status.js, trip.js
+- explore*.js는 개발 중 탐색 스크립트 (지워도 됨). 산출물은 lib/, submit.js, status.js, trip.js, selfcare.js
 - 세션 만료 시 `node login.js`로 재로그인 (headed 브라우저)
