@@ -88,8 +88,11 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - 계정: 52010108 판)복리후생비-자기관리비 | 52010109 판)복리후생비-가족식사비
 - 폼 기본값(BLART/GSBER/ZLSCH/MWSKZ/LIFNR/ZTERM/KOSTL)이 이미 과거 패턴과 일치 — BLDAT·SGTXT·HKONT·WRBTR만 입력
 - 입력: `selfcare-items.json` (예시: selfcare-items.example.json), 사용법: `node selfcare.js plan → dry → run`
-- 증빙: 카카오톡 나와의 채팅 캡처 — Tyler가 해당 내역이 보이게 창을 띄우면
-  `powershell -File ~/flex-fitness-agent/lib/capture-kakao.ps1 -OutFile inbox/selfcare-YYYYMMDD.png` (agent 폴더에서 실행)
+- 증빙 (건별로 다름, items의 file 단건 | files 배열 둘 다 지원):
+  - 자기관리비: 카카오톡 나와의 채팅 캡처 — Tyler가 창을 띄우면
+    `powershell -File ~/flex-fitness-agent/lib/capture-kakao.ps1 -OutFile inbox/selfcare-YYYYMMDD.png` (agent 폴더에서 실행)
+  - 가족식사비: 삼성카드 매출전표(trip-capture-slip.js) + 가족식사 사진 — Tyler가 사진을 화면에 띄우면
+    `powershell -File lib/capture-screen.ps1 -OutFile inbox/familymeal-photo-YYYYMMDD.png` (전체 화면 캡처, 2026-07-14 검증)
 - 결재선(과거): 경비검토(성민지) → Leah Song(송현아)
 - 2026-07-14 dry 검증 완료 (폼 입력·계정명 조회·지급예정일 자동계산 확인, 전표생성은 안 누름)
 

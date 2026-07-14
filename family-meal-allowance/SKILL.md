@@ -1,6 +1,6 @@
 ---
 name: family-meal-allowance
-description: 가족식사비 정산 — 카카오톡 나와의 채팅 화면을 캡처해 증빙으로 쓰고, EAC 장려지원금(FI_21) 전표를 자동 생성한다. "가족식사비 올려줘", "가족식사비 정산", "분기 가족식사비 전표 만들어줘" 같은 요청에 적합하다. 전표 생성까지만 자동이고 상신은 Tyler가 직접 한다.
+description: 가족식사비 정산 — 삼성카드 매출전표와 가족식사 사진(화면 캡처)을 증빙으로 수집하고, EAC 장려지원금(FI_21) 전표를 자동 생성한다. "가족식사비 올려줘", "가족식사비 정산", "분기 가족식사비 전표 만들어줘" 같은 요청에 적합하다. 전표 생성까지만 자동이고 상신은 Tyler가 직접 한다.
 ---
 
 너는 Tyler(직방 스마트홈)의 가족식사비 정산 비서다. 가족식사비 지출 증빙을 준비하고 EAC(직방 전자결재)의 **비용정산 > 장려지원금(FI_21)** 폼으로 전표를 생성한다. **분기 1회 몰아서** 정산하는 것이 기본 (과거: "2사분기 가족식사비").
@@ -13,16 +13,17 @@ description: 가족식사비 정산 — 카카오톡 나와의 채팅 화면을 
 
 ## 진행 순서 (작업 폴더: `~/.claude/skills/corporate-card-settlement/agent` — 자기관리비와 봇 공용)
 
-1. **증빙 캡처** (카카오톡 나와의 채팅 화면 캡처 → agent/inbox/에 저장):
-   - Tyler에게 "카카오톡 나와의 채팅에서 해당 증빙(결제내역 등)이 보이게 창을 띄워달라"고 요청
-   - 띄웠다고 하면: `powershell -File ~/flex-fitness-agent/lib/capture-kakao.ps1 -OutFile inbox/familymeal-YYYYMMDD.png`
-     (agent 폴더에서 실행 — 상대경로 OutFile 기준. 캡처 후 이미지를 열어 내용이 맞는지 확인할 것)
-   - 여러 건이면 건별로 "다음 내역 띄워주세요" → 캡처 반복
-2. **`selfcare-items.json` 작성**: `[{date:"YYYYMMDD", desc, account, amount, file}]`
+1. **증빙 수집** (2종 → agent/inbox/에 저장):
+   - **삼성카드 매출전표**: `cd ~/flex-fitness-agent && node trip-capture-slip.js --date 2026.MM.DD --amount N --name 이름`
+     (headed, 삼성카드 로그인 필요 — 10분 세션)
+   - **가족식사 사진**: Tyler에게 "식사 사진을 화면에 띄워달라"고 요청, 띄웠다고 하면
+     `powershell -File lib/capture-screen.ps1 -OutFile inbox/familymeal-photo-YYYYMMDD.png` (agent 폴더에서 실행 — 전체 화면 캡처)
+   - 캡처 후 이미지를 열어 내용이 맞는지 확인. 식사가 여러 번이면 건별로 반복
+2. **`selfcare-items.json` 작성**: `[{date:"YYYYMMDD", desc, account, amount, files:[...]}]`
    - account: **52010109 판)복리후생비-가족식사비**
    - desc 예: "3사분기 가족식사비" (헤더적요=라인적요=제목이 됨). 분기 합산 1건 = 전표 1개가 과거 패턴
    - date(증빙일): 과거 건은 분기 내 대표일(월초) 사용
-   - file: 카카오톡 캡처 경로 (선택 — FI_21은 첨부 없이 통과된 선례 있음. 그래도 첨부 권장)
+   - files: 증빙 배열 (매출전표 + 식사 사진. FI_21은 첨부 없이 통과된 선례 있으나 첨부 권장)
 3. **전표 생성**: `node selfcare.js plan`(검증·미리보기) → `node selfcare.js dry`(폼만, 스크린샷) → `node selfcare.js run`(전표생성, 상신 안 함)
 4. **상신 안내** (Tyler 수동): EA전표결재 → 행 선택 → 그룹번호생성 → 결재요청 → 팝업에서 결재요청.
    결재선(과거): 경비검토(성민지) → Leah Song(송현아)

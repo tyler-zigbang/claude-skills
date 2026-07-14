@@ -8,7 +8,8 @@
 // 입력 파일: selfcare-items.json
 //   [{ "date": "20260620", "desc": "자기관리비(미용)", "account": "52010108", "amount": 49000, "file": "inbox/slip.png" }, ...]
 //   account: 52010108 자기관리비 | 52010109 가족식사비
-//   file: 증빙 (삼성카드 매출전표 캡처). FI_21은 첨부 없이도 통과된 선례가 있어 선택사항이지만 첨부 권장.
+//   file: 증빙 1건 | files: 증빙 여러 건 배열 (예: 가족식사비 = 매출전표 + 식사 사진 2건).
+//   FI_21은 첨부 없이도 통과된 선례가 있어 선택사항이지만 첨부 권장.
 //
 // 과거 상신 패턴 (Zigbang-회계전표-2026-0000022872 "자기관리비(미용)"에서 학습):
 //   메뉴 = 비용정산 > 장려지원금 (FI_21). 화면 구조는 일반경비(FI_22)와 동일.
@@ -39,10 +40,10 @@ function loadItems() {
     if (!ACCOUNTS[it.account]) throw new Error(`items[${i}].account 미지원 계정: ${it.account} (52010108 자기관리비 | 52010109 가족식사비)`);
     if (!it.desc || !it.desc.trim()) throw new Error(`items[${i}].desc 비어 있음`);
     if (!Number.isFinite(it.amount) || it.amount <= 0) throw new Error(`items[${i}].amount가 양수가 아님: ${it.amount}`);
-    if (it.file) {
-      it.file = path.resolve(__dirname, it.file);
-      if (!fs.existsSync(it.file)) throw new Error(`items[${i}].file 파일 없음: ${it.file}`);
-    }
+    it.files = [...(it.file ? [it.file] : []), ...(Array.isArray(it.files) ? it.files : [])];
+    delete it.file;
+    it.files = it.files.map((f) => path.resolve(__dirname, f));
+    for (const f of it.files) if (!fs.existsSync(f)) throw new Error(`items[${i}] 증빙 파일 없음: ${f}`);
   }
   return items;
 }
@@ -52,7 +53,7 @@ function printPlan(items) {
   log(`\n자기관리비(장려지원금) 전표 생성 계획 ${items.length}건:`);
   for (const it of items) {
     total += it.amount;
-    log(`  [증빙일 ${it.date}] ${it.desc} — ${it.amount.toLocaleString()}원 → ${it.account} ${ACCOUNTS[it.account]}${it.file ? '' : ' (증빙 미첨부)'}`);
+    log(`  [증빙일 ${it.date}] ${it.desc} — ${it.amount.toLocaleString()}원 → ${it.account} ${ACCOUNTS[it.account]} (증빙 ${it.files.length}건${it.files.length ? '' : ' — 미첨부'})`);
   }
   log(`  합계: ${total.toLocaleString()}원`);
   log('  (전표유형 KE / 사업영역 K200 / 세금 T0 / 지급방법 R / 지급조건 V123 / CC 226020 / 조정계정 21020103-정진우)');
@@ -188,7 +189,7 @@ async function createOne(page, item, i, { dry }) {
   await gotoMenu(page, '비용정산', '장려지원금');
   await page.waitForTimeout(2000);
   await fillForm(page, item);
-  if (item.file) await attachFile(page, item.file);
+  for (const f of item.files) await attachFile(page, f);
   await page.screenshot({ path: path.join(OUT, `${stamp}-selfcare-form-${i + 1}.png`) });
   if (dry) {
     log('  [dry] 폼 입력까지만 — 전표생성 버튼 안 누름 (스크린샷: logs/)');
