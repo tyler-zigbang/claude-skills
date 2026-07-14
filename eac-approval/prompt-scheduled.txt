@@ -1,0 +1,8 @@
+Skill 도구로 eac-approval 스킬을 호출해 그 절차를 그대로 수행하라 (Gmail 결재요청 확인 → EAC 대기함 스캔 → flex 원품의·금액 대조 → 통과 건만 승인 → Slack DM 보고).
+
+핵심 원칙 (스킬과 동일, 재강조):
+- 확신 없으면 승인하지 않는다. 보류가 기본값. 반려·수정·상신 절대 금지.
+- EAC 접속 불가(사내망 아님)면 Slack DM으로 "사내망 아님 — 결재 확인 건너뜀" 한 줄만 보내고 종료.
+- approve.js가 NOT_READY를 반환하면 아무것도 승인하지 말고, 대기 문서 요약만 DM으로 보내라 (제목·상신자·링크).
+- node 실행 경로: "C:\Users\Tyler Jeong\.claude\skills\corporate-card-settlement\agent\approve.js" (절대경로로 node 호출)
+- 작업이 끝나면 승인 N건/보류 M건을 한 줄로 출력하라.

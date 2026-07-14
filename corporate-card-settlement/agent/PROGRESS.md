@@ -96,6 +96,17 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - 결재선(과거): 경비검토(성민지) → Leah Song(송현아)
 - 2026-07-14 dry 검증 완료 (폼 입력·계정명 조회·지급예정일 자동계산 확인, 전표생성은 안 누름)
 
+## 결재 승인 봇 — approve.js (2026-07-14 추가, 스킬: eac-approval) ⚠️ 미완성
+- Tyler에게 온 결재요청을 심사해 자동 승인. 기준(Tyler 확정): ①flex 원품의 첨부 존재+내용 부합 ②전표 금액 ≤ 품의 금액. 불충족/애매 → 보류+Slack DM. 반려 금지.
+- 결재요청 메일: eaccountinfo@zigbang.com, 본문에 view.do 링크 (programId=DRAFT_0011, WF_KEY=K00110...문서번호, Tyler PERNR=ZB01096)
+- 사용법: `node approve.js menus|scan|open <WF_KEY>|flex <URL>|approve <WF_KEY>`
+- flex 원품의 열람은 ~/flex-fitness-agent의 profile+쿠키 재사용 (만료 시 그쪽 login.js)
+- 스케줄: 작업 스케줄러 "EAC Approval AM/PM" (평일 11:00/18:00, run-claude.ps1 + ~/.claude/skills/eac-approval/prompt-scheduled.txt) — **현재 비활성**
+- [ ] **사내망에서 탐색 필요**: ①결재 대기함 메뉴명 확정(scan의 INBOX_LEAF_CANDIDATES) ②대기함 그리드 필드 파악
+      ③문서 팝업에서 승인 버튼/확인 팝업 흐름 확정(cmdApprove의 후보 셀렉터 검증) ④원품의 flex URL 추출 위치 확인
+- [ ] 검증 완료 후: approve-ready.flag 생성(이거 없으면 approve 거부됨) + 스케줄러 활성화(Enable-ScheduledTask "EAC Approval AM","EAC Approval PM")
+- 안전장치: approve-ready.flag 없으면 승인 거부 / 스킬·프롬프트에 "확신 없으면 보류" 원칙 명시
+
 ## 주의
-- explore*.js는 개발 중 탐색 스크립트 (지워도 됨). 산출물은 lib/, submit.js, status.js, trip.js, selfcare.js
+- explore*.js는 개발 중 탐색 스크립트 (지워도 됨). 산출물은 lib/, submit.js, status.js, trip.js, selfcare.js, approve.js
 - 세션 만료 시 `node login.js`로 재로그인 (headed 브라우저)
