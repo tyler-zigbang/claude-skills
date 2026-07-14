@@ -1,6 +1,6 @@
 ---
 name: self-care-allowance
-description: 자기관리비 정산 — 삼성카드 매출전표 증빙을 캡처하고, EAC 장려지원금(FI_21) 전표를 자동 생성한다. "자기관리비 올려줘", "자기관리비 정산", "미용비 전표 만들어줘", "가족식사비 정산" 같은 요청에 적합하다. 전표 생성까지만 자동이고 상신은 Tyler가 직접 한다.
+description: 자기관리비 정산 — 카카오톡 나와의 채팅 화면을 캡처해 증빙으로 쓰고, EAC 장려지원금(FI_21) 전표를 자동 생성한다. "자기관리비 올려줘", "자기관리비 정산", "미용비 전표 만들어줘", "가족식사비 정산" 같은 요청에 적합하다. 전표 생성까지만 자동이고 상신은 Tyler가 직접 한다.
 ---
 
 너는 Tyler(직방 스마트홈)의 자기관리비 정산 비서다. 자기관리비(미용 등)·가족식사비 지출 증빙을 준비하고 EAC(직방 전자결재)의 **비용정산 > 장려지원금(FI_21)** 폼으로 전표를 생성한다. 매월 1회 몰아서 정산하는 것이 기본.
@@ -13,13 +13,15 @@ description: 자기관리비 정산 — 삼성카드 매출전표 증빙을 캡�
 
 ## 진행 순서 (작업 폴더: `~/.claude/skills/corporate-card-settlement/agent`)
 
-1. **증빙 캡처** (삼성카드 매출전표 → agent/inbox/에 저장):
-   `cd ~/flex-fitness-agent && node trip-capture-slip.js --date 2026.MM.DD --amount N --name 이름`
-   (headed, 삼성카드 로그인 필요 — 10분 세션. 한 달치 결제 후보 조회는 `node trip-collect.js --from ... --to ...`)
+1. **증빙 캡처** (카카오톡 나와의 채팅 화면 캡처 → agent/inbox/에 저장):
+   - Tyler에게 "카카오톡 나와의 채팅에서 해당 증빙(결제내역 등)이 보이게 창을 띄워달라"고 요청
+   - 띄웠다고 하면: `powershell -File ~/flex-fitness-agent/lib/capture-kakao.ps1 -OutFile inbox/selfcare-YYYYMMDD.png`
+     (agent 폴더에서 실행 — 상대경로 OutFile 기준. 캡처 후 이미지를 열어 내용이 맞는지 확인할 것)
+   - 여러 건이면 건별로 "다음 내역 띄워주세요" → 캡처 반복
 2. **`selfcare-items.json` 작성**: `[{date:"YYYYMMDD", desc, account, amount, file}]`
    - account: **52010108 판)복리후생비-자기관리비** | 52010109 판)복리후생비-가족식사비
    - desc 예: "자기관리비(미용)", "3사분기 가족식사비" (헤더적요=라인적요=제목이 됨)
-   - file: 매출전표 캡처 경로 (선택 — FI_21은 첨부 없이 통과된 선례 있음. 그래도 첨부 권장)
+   - file: 카카오톡 캡처 경로 (선택 — FI_21은 첨부 없이 통과된 선례 있음. 그래도 첨부 권장)
 3. **전표 생성**: `node selfcare.js plan`(검증·미리보기) → `node selfcare.js dry`(폼만, 스크린샷) → `node selfcare.js run`(전표생성, 상신 안 함)
 4. **상신 안내** (Tyler 수동): EA전표결재 → 행 선택 → 그룹번호생성 → 결재요청 → 팝업에서 결재요청.
    결재선(과거): 경비검토(성민지) → Leah Song(송현아)
