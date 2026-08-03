@@ -41,6 +41,8 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - [x] 작업 스케줄러 등록: "EAC Card Agent Monthly" — 매월 5일 09:00, run-monthly.ps1
       (놓친 실행은 PC 켜지면 실행, 로그: logs/monthly-*.log)
 - [x] 2026-07-13 실행: 15건 전표생성 완료 (3200010229~3200010243, 분류불가 0건, 미상신)
+- [x] 2026-08-03 실행: 7월 사용분 39건 전표생성 완료 (3200011166~3200011232, 전기일 20260801, 미상신).
+      분류불가 1건 제외: 호우지시절(중국식) 93,000원 — 수동 처리 필요. 중국식 MCC 규칙 추가 검토
 - [x] 2026-07-13 이관: `~/eac-card-agent` → **`~/.claude/skills/corporate-card-settlement/agent`** (스킬에 통합, claude-skills repo 백업).
       작업 스케줄러·run-monthly.ps1·SKILL.md 2개·flex trip-capture-slip.js/trip-roaming.js 경로 갱신 완료.
       business-trip-settlement 스킬도 이 agent 폴더를 공용으로 사용 (trip.js)
