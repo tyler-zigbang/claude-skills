@@ -38,7 +38,7 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - [x] 2026-07-10 실행: 8건 전표생성 완료 (3200010171~77 + 3200010180, 그룹 FI20260000026144, 미상신)
       — 정화흥산(주)는 카페로 확인되어 개별 규칙 추가 (MCC "완구점"은 오등록)
 - [x] 전기일(BUDAT) = 실행하는 달의 1일로 자동 설정 (2026-07-10 Tyler 지시, test-budat.js로 검증)
-- [x] 작업 스케줄러 등록: "EAC Card Agent Monthly" — 매월 5일 09:00, run-monthly.ps1
+- [x] 작업 스케줄러 등록: "EAC Card Agent Monthly" — **매월 25일 09:00** (2026-08-25 Tyler 지시로 5일→25일 변경), run-monthly.ps1
       (놓친 실행은 PC 켜지면 실행, 로그: logs/monthly-*.log)
 - [x] 2026-07-13 실행: 15건 전표생성 완료 (3200010229~3200010243, 분류불가 0건, 미상신)
 - [x] 2026-08-03 실행: 7월 사용분 39건 전표생성 완료 (3200011166~3200011232, 전기일 20260801, 미상신).
@@ -46,6 +46,11 @@ node submit.js approve   # 그룹생성→결재요청→상신까지 (현재 �
 - [x] 2026-07-13 이관: `~/eac-card-agent` → **`~/.claude/skills/corporate-card-settlement/agent`** (스킬에 통합, claude-skills repo 백업).
       작업 스케줄러·run-monthly.ps1·SKILL.md 2개·flex trip-capture-slip.js/trip-roaming.js 경로 갱신 완료.
       business-trip-settlement 스킬도 이 agent 폴더를 공용으로 사용 (trip.js)
+- [x] 2026-08-25 실행: 8월 사용분 29건 전표생성 (3200012293~3200012321, 전기일 20260801) 후
+      **Tyler 지시로 전기일=증빙일로 변경** — 기존 29건은 Tyler가 EAC에서 직접 삭제, submit.js 수정(BUDAT=APPR_DATE) 후
+      재생성 완료 (**3200012323~3200012351**, 전기일=각 승인일, 미상신).
+      미처리 1건 남음: (주)우아한형제들(배달, PG온라인) 26,500원 — "추정" 분류라 자동 생성에서 제외, 수동 처리 필요
+      부수 도구 추가: delete-slips.js (임시전표 선택 삭제, #multiDeleteStatement)
 - [ ] Tyler가 EAC에서 상신 (결재요청 버튼만 누르면 됨)
 - [ ] Slack 알림 연동 (실행 결과 + 분류불가 건 통보)
 

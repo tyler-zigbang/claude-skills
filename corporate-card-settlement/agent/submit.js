@@ -87,9 +87,8 @@ async function createOne(page, apprNo) {
   const hash = await page.evaluate(() => location.hash);
   if (!hash.includes('UD_0201_001')) throw new Error(`전표작성 폼 진입 실패 (hash=${hash})`);
 
-  // 전기일: 실행하는 달의 1일 (과거 상신 패턴: 6월 사용분 → 전기일 7/1)
-  const now = new Date();
-  const budat = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}01`;
+  // 전기일: 증빙일(카드 승인일)과 동일 (2026-08-25 Tyler 지시. 기존 규칙 '실행 달의 1일'은 폐기)
+  const budat = String(row.APPR_DATE);
 
   // 적요 + 계정코드 + 전기일 입력
   const fill = await page.evaluate(
