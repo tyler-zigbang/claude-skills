@@ -17,7 +17,9 @@ $repos = @(
     'C:\Users\Tyler Jeong\obgyn-video',
     'C:\Users\Tyler Jeong\clinic-scribe',
     'C:\Users\Tyler Jeong\stock-agent',
-    'C:\Users\Tyler Jeong\longterm-agent'
+    'C:\Users\Tyler Jeong\longterm-agent',
+    'C:\Users\Tyler Jeong\.claude\automation\etf-screener',
+    'C:\Users\Tyler Jeong\.claude\automation'
 )
 
 $hostName = $env:COMPUTERNAME

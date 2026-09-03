@@ -7,8 +7,9 @@ description: 사무실에서 하던 개인 Claude 작업(영상 만들기 등)�
 
 Tyler의 개인 Claude 작업(영상 등)을 PC 간에 이어서 하도록, 개인 깃(GitHub `fiveflute-collab`)으로 동기화한다. 결정적 동작은 아래 스크립트가 수행하고, 너는 실행·결과 요약·문제 안내를 담당한다.
 
-## 동기화 대상 (개인 repo 4개)
+## 동기화 대상 (개인 repo 6개)
 - `obgyn-video` (영상), `clinic-scribe`, `stock-agent`(→korea-stock-agent), `longterm-agent`
+- `.claude\automation\etf-screener` (ebot → etf-screener), `.claude\automation` (→claude-automation: monday-digest·send_html.py·run 스크립트, etf-screener 폴더는 .gitignore로 제외)
 - 모두 `fiveflute-collab` 소유. 목록 변경은 스크립트의 `$repos` 배열을 수정한다.
 
 ## 모드
