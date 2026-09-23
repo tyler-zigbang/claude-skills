@@ -145,33 +145,68 @@ async function createOne(page, apprNo) {
 
   await page.screenshot({ path: path.join(OUT, `${stamp}-form-${apprNo}.png`) });
 
-  // 전표생성
-  await page.locator('#createStatement').click();
-  // 성공 모달("전표가 정상적으로 생성 되었습니다" + 전표번호) 대기
+  // 전표생성 — 마감월 알림([ZUNIEFI_1009] "전기일을 익월 1일로 입력") 시 전기일을 익월 1일로 바꿔 재시도 (2026-09-23 추가)
+  const nextMonthFirst = (yyyymmdd) => {
+    const y = +yyyymmdd.slice(0, 4), m = +yyyymmdd.slice(4, 6); // m = 1-based 월 → Date(y, m, 1)은 다음 달 1일
+    const d = new Date(y, m, 1);
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}01`;
+  };
   let belnr = null;
-  for (let i = 0; i < 15; i++) {
-    await page.waitForTimeout(2000);
-    const modal = await page.evaluate(() => {
-      const dlg = [...document.querySelectorAll('div')].find(
-        (e) => e.getBoundingClientRect().width > 0 && /전표가 정상적으로 생성/.test(e.innerText || '') && e.innerText.length < 500
-      );
-      return dlg ? dlg.innerText : null;
-    });
-    if (modal) {
-      belnr = (modal.match(/32\d{8}/) || [null])[0];
-      break;
+  let curBudat = budat;
+  for (let attempt = 0; attempt < 3 && !belnr; attempt++) {
+    await page.locator('#createStatement').click();
+    let closedMonth = false;
+    // 성공 모달("전표가 정상적으로 생성 되었습니다" + 전표번호) 대기
+    for (let i = 0; i < 15; i++) {
+      await page.waitForTimeout(2000);
+      const modal = await page.evaluate(() => {
+        const dlg = [...document.querySelectorAll('div')].find(
+          (e) => e.getBoundingClientRect().width > 0 && /전표가 정상적으로 생성/.test(e.innerText || '') && e.innerText.length < 500
+        );
+        return dlg ? dlg.innerText : null;
+      });
+      if (modal) {
+        belnr = (modal.match(/32\d{8}/) || [null])[0];
+        break;
+      }
+      // 알림 모달 문구 수집
+      const alertTxt = await page.evaluate(() => {
+        const dlg = [...document.querySelectorAll('.ui-dialog, .unidocu-dialog, [class*="dialog"]')].find(
+          (e) => e.getBoundingClientRect().width > 0 && (e.innerText || '').trim()
+        );
+        return dlg ? dlg.innerText.replace(/\s+/g, ' ').slice(0, 200) : null;
+      });
+      if (alertTxt && /마감되었습니다/.test(alertTxt)) {
+        closedMonth = true;
+        log('  [마감월] ' + alertTxt);
+        break;
+      }
+      if (alertTxt && /입력해 주세요|오류|실패/.test(alertTxt)) throw new Error('전표생성 검증 실패: ' + alertTxt.slice(0, 150));
+      if (alertTxt) log('  [진단 모달] ' + alertTxt);
     }
-    // 검증 실패 알림 모달이면 에러
-    const err = await page.evaluate(() => {
-      const dlg = [...document.querySelectorAll('[class*="dialog"]')].find(
-        (e) => e.getBoundingClientRect().width > 0 && /입력해 주세요|오류|실패/.test(e.innerText || '')
-      );
-      return dlg ? dlg.innerText.replace(/\s+/g, ' ').slice(0, 150) : null;
-    });
-    if (err) throw new Error('전표생성 검증 실패: ' + err);
+    if (belnr || !closedMonth) break;
+    // 마감월: 알림 닫고 전기일을 익월 1일로 변경 후 재시도
+    await dismissModals(page, 2);
+    curBudat = nextMonthFirst(curBudat);
+    log(`  → 전기일을 ${curBudat}로 변경해 재시도`);
+    const set = await page.evaluate((b) => {
+      try {
+        const c = window.$u.get('BUDAT');
+        c.setValue(b);
+        c.$el.find('input').trigger('change');
+        return window.$u.get('BUDAT').getValue();
+      } catch (e) {
+        return 'ERR:' + e.message;
+      }
+    }, curBudat);
+    if (set !== curBudat) throw new Error(`전기일 변경 실패 (${set})`);
+    await page.waitForTimeout(3000);
   }
-  if (!belnr) throw new Error('전표생성 성공 모달을 확인하지 못함');
-  log(`  ✔ 전표번호 ${belnr} 생성됨`);
+  if (!belnr) {
+    await page.screenshot({ path: path.join(OUT, `${stamp}-fail-${apprNo}.png`), fullPage: true }).catch(() => {});
+    throw new Error('전표생성 성공 모달을 확인하지 못함 (스크린샷: logs/' + stamp + '-fail-' + apprNo + '.png)');
+  }
+  log(`  ✔ 전표번호 ${belnr} 생성됨` + (curBudat !== budat ? ` (전기일 ${budat} → ${curBudat}, 마감월 조정)` : ''));
   await page.screenshot({ path: path.join(OUT, `${stamp}-created-${apprNo}.png`) });
   // "계속 작성" 클릭 → 다음 건 진행 가능 상태로
   const contBtn = page.locator('button').filter({ hasText: '계속 작성' }).first();
