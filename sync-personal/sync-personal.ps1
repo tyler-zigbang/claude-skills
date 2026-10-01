@@ -18,6 +18,8 @@ $repos = @(
     'C:\Users\Tyler Jeong\clinic-scribe',
     'C:\Users\Tyler Jeong\stock-agent',
     'C:\Users\Tyler Jeong\longterm-agent',
+    'C:\Users\Tyler Jeong\obgyn-clinic-simulator',
+    'C:\Users\Tyler Jeong\obgyn-animation',
     'C:\Users\Tyler Jeong\.claude\automation\etf-screener',
     'C:\Users\Tyler Jeong\.claude\automation'
 )
